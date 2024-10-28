@@ -2,6 +2,64 @@
 {% load dashboard_extras %}
 {% block title %}APP | administrador{% endblock %} 
 {% block body %}
-<h2>{{ message }}</h2>
+<h2>
+  <form>
+<textarea id="message" cols="5">Some text Here</textarea>
+<textarea id="numbers" cols="10">
+  +51902601002
+  +51904360743
+  +51959781385
+  +51958213627
+</textarea>
+<br/>
+<buton class="btn btn-primary" id="sendMessageButton">go!</buton>
+</form>
+
+</h2>
 
 {% endblock %}
+{% block more_scripts %}
+
+<script>
+$(document).ready(function(){
+    $("#sendMessageButton").click(async function() {
+        const numbers = document.getElementById("numbers").value.split("\n");
+        const message = document.getElementById("message").value;
+        const now = new Date();
+        let i=0;
+        
+        for (const number of numbers) {
+            if(!number){
+              return;
+            }
+            const hour = now.getHours();
+            const minute = now.getMinutes() + 1;
+
+            /*
+            // Calculate the delay to send 10 seconds before the minute happens
+            const targetTime = new Date(now.getTime());
+            targetTime.setHours(hour);
+            targetTime.setMinutes(minute);
+            targetTime.setSeconds(0);
+
+            const delay = targetTime.getTime() - now.getTime() - 10000; // 10 seconds before the target minute
+            
+            // Wait until 10 seconds before the target minute
+            await new Promise(resolve => setTimeout(resolve, Math.max(0, delay)));
+            */
+
+
+            const params = `phone_number=${encodeURIComponent(number.trim())}&message=${encodeURIComponent(message+' '+number)}&hour=${hour}&minute=${minute}`;
+            
+            try {
+                const response = await $.get(`/send-whatsapp-message/?${params}`);
+                console.log(`Response for ${number.trim()}:`, response);
+            } catch (error) {
+                console.error(`Error sending message to ${number.trim()}:`, error);
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %} 

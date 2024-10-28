@@ -1,0 +1,107 @@
+{% extends 'dashboard/layout.html' %}
+{% load dashboard_extras %}
+{% block title %}APP | administrador{% endblock %} 
+{% block body %}
+
+<!-- display_data.html -->
+<h2>Datos del Archivo XLS</h2>
+<!--
+<table border="1">
+    <tr>
+        {% for key in data.0.keys %}
+            <th>{{ key }}</th>
+        {% endfor %}
+    </tr>
+    {% for row in data %}
+        <tr>
+            {% for value in row.values %}
+                <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+-->
+
+<table class="table">
+    <tr>        
+        <th>Nombre</th>
+        <th>Numero</th>
+        <th></th>
+    </tr>
+    {% for row in data %}
+        <tr>
+            <td>{{row.nombre}}</td>
+            <td>{{row.numero}}</td>
+            <td id="tr{{row.numero}}"></td>
+        </tr>
+    {% endfor %}
+</table>
+<br/>
+<textarea id="message" cols="5" class="form-control">Estimado NAME como esta ud? bla bla bla...</textarea>
+<br/>
+<buton class="btn btn-primary" id="sendMessageButton">Enviar wasapazo</buton>
+{% endblock %}
+
+{% block more_scripts %}
+<script>
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function formatDate(date) {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+
+        const formattedTime = `${hours}:${minutes}:${seconds}`;
+        return formattedTime;
+    }
+
+    $(document).ready(function(){
+        $("#sendMessageButton").click(async function() {
+            const numbers = [];            
+            const names = [];
+            {% for row in data %}
+            numbers.push('{{row.numero}}');
+            names.push('{{row.nombre}}');
+            {% endfor %}            
+
+            console.log({numbers, names});
+
+            const message = $("#message").val();
+            // const now = new Date();
+            let i=0;
+            
+            for (const number of numbers) {
+                if(!number){
+                  return;
+                }
+                
+                if(i>0) {
+                    const now = new Date();
+                    const oneMinute = 60000;
+                    const oneMinuteFromNow = new Date(now.getTime() + oneMinute);
+                    $(`#tr${number}`).text(`mensaje se enviará a las ${formatDate(oneMinuteFromNow)}`);
+                    await delay(oneMinute); // 60000 milliseconds = 1 minute
+                }
+
+
+                // const hour = now.getHours();
+                // const minute = now.getMinutes() + 1;
+                // const params = `phone_number=${encodeURIComponent(number.trim())}&message=${encodeURIComonent(message.replace("NAME", names[i]))}&hour=${hour}&minute=${minute}`;
+                const params = `phone_number=${encodeURIComponent(number.trim())}&message=${encodeURIComponent(message.replace("NAME", names[i]))}`;
+                
+                try {
+                    const response = await $.get(`/send-whatsapp-message/?${params}`);
+                    $(`#tr${number}`).text('mensaje enviado');
+                    console.log(`Response for ${number.trim()}:`, response);
+                } catch (error) {
+                    console.error(`Error sending message to ${number.trim()}:`, error);
+                }
+
+                i++;
+            }
+        });
+    });
+</script>
+{% endblock %}
