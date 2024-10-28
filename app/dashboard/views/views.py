@@ -5,7 +5,7 @@ from .apis.people import PersonViewSet, PersonPathSerializer
 from .apis.users import UserViewSet, UserPathSerializer
 from django.http import JsonResponse
 import pywhatkit as kit
-import pyautogui
+#import pyautogui
 import datetime
 import time
 
