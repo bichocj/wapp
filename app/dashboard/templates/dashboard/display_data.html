@@ -25,19 +25,41 @@
 <table class="table">
     <tr>        
         <th>Nombre</th>
+        <th>Sexo</th>
         <th>Numero</th>
+        <th>Banco</th>
+        <th>Empresa</th>
         <th></th>
     </tr>
     {% for row in data %}
+        {% if row.nombre == row.nombre %}
         <tr>
             <td>{{row.nombre}}</td>
+            <td>{{row.sexo}}</td>
             <td>{{row.numero}}</td>
+            <td>{{row.banco}}</td>
+            <td>{{row.empresa}}</td>
             <td id="tr{{row.numero}}"></td>
         </tr>
+        {% endif %}
     {% endfor %}
 </table>
 <br/>
-<textarea id="message" cols="5" class="form-control">Estimado NAME como esta ud? bla bla bla...</textarea>
+<textarea id="message" cols="5" class="form-control">
+Estimad(SEX) NAME
+
+Soy Johnny, Analista de Crédito de Scotiabank y me complace informarle sobre una campaña especial que estamos lanzando para COMPANY.
+
+Estamos ofreciendo la posibilidad de comprar su deuda actual con BANK y transferirla con una Menor Tasa a Scotiabank. Es una excelente oportunidad para reducir sus costos financieros y simplificar sus pagos.
+
+Si está interesado en obtener más información sobre esta oferta exclusiva, no dude en contactarme o responder a este mensaje para coordinar una reunión o agendar una llamada telefónica.
+
+Atentamente,
+
+Johnny
+Analista de Crédito
+Convenio - Scotiabank
+</textarea>
 <br/>
 <buton class="btn btn-primary" id="sendMessageButton">Enviar wasapazo</buton>
 {% endblock %}
@@ -61,12 +83,19 @@
         $("#sendMessageButton").click(async function() {
             const numbers = [];            
             const names = [];
-            {% for row in data %}
-            numbers.push('{{row.numero}}');
-            names.push('{{row.nombre}}');
-            {% endfor %}            
+            const sexs = [];
+            const companies = [];
+            const banks = [];
 
-            console.log({numbers, names});
+            {% for row in data %}
+            {% if row.nombre == row.nombre %}
+            numbers.push(parseInt('{{row.numero}}'));
+            names.push('{{row.nombre}}');
+            sexs.push('{{row.sexo}}');
+            companies.push('{{row.empresa}}');
+            banks.push('{{row.banco}}');
+            {% endif %}
+            {% endfor %}
 
             const message = $("#message").val();
             // const now = new Date();
@@ -89,14 +118,21 @@
                 // const hour = now.getHours();
                 // const minute = now.getMinutes() + 1;
                 // const params = `phone_number=${encodeURIComponent(number.trim())}&message=${encodeURIComonent(message.replace("NAME", names[i]))}&hour=${hour}&minute=${minute}`;
-                const params = `phone_number=${encodeURIComponent(number.trim())}&message=${encodeURIComponent(message.replace("NAME", names[i]))}`;
+                let messageTmp = message;
+                messageTmp = messageTmp.replace("SEX", sexs[i].toUpperCase() == 'H' ? 'o': 'a' );
+                messageTmp = messageTmp.replace("NAME", names[i]);
+                messageTmp = messageTmp.replace("COMPANY", companies[i]);
+                messageTmp = messageTmp.replace("BANK", banks[i]);
+
+                console.log({messageTmp})
+                const params = `phone_number=${number}&message=${encodeURIComponent(messageTmp)}`;
                 
                 try {
                     const response = await $.get(`/send-whatsapp-message/?${params}`);
                     $(`#tr${number}`).text('mensaje enviado');
-                    console.log(`Response for ${number.trim()}:`, response);
+                    console.log(`Response for ${number}:`, response);
                 } catch (error) {
-                    console.error(`Error sending message to ${number.trim()}:`, error);
+                    console.error(`Error sending message to ${number}:`, error);
                 }
 
                 i++;
