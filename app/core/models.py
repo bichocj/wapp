@@ -23,3 +23,7 @@ class Person(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+class Browser(models.Model):
+    name = models.CharField("nombre", max_length=50)
+    path = models.TextField("ubicacion")

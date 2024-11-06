@@ -8,7 +8,9 @@ import pywhatkit as kit
 #import pyautogui
 import datetime
 import time
+import webbrowser
 
+from core.models import Browser
 from django.shortcuts import render
 from .forms import XLSUploadForm
 import pandas as pd
@@ -24,7 +26,17 @@ def upload_xls_view(request):
                 df = pd.read_excel(file)
                 # Puedes realizar alguna lógica aquí, como procesar o guardar los datos
                 data = df.to_dict(orient="records")  # Convertir a una lista de diccionarios para renderizar
-                
+                browsers = Browser.objects.all()
+                for b in browsers:
+                    webbrowser.register(b.name, None, webbrowser.BackgroundBrowser(b.path))
+
+                i = 0
+                for d in data:
+                    if i + 1 > len(browsers):
+                        i = 0
+                    d['browser'] = browsers[i].name
+                    i += 1                               
+
                 return render(request, "dashboard/display_data.html", {"data": data})
             
             except Exception as e:
@@ -42,28 +54,11 @@ def home_view(request):
 
 
 def send_whatsapp_message(request):
-    # Get parameters from the request
     phone_number = "+" + request.GET.get("phone_number")
     message = request.GET.get("message")
-    #send_hour = request.GET.get("hour")
-    #send_minute = request.GET.get("minute")
-
-    
-    # Set default time if hour and minute are not provided
-    # now = datetime.datetime.now()
-    #if send_hour is None:
-    #    send_hour = now.hour
-    #else:
-    #    send_hour = int(send_hour)
-        
-    #if send_minute is None:
-    #    send_minute = (now.minute + 2) % 60
-    #else:
-    #    send_minute = int(send_minute) + 1
-    
-    try:
-        # kit.sendwhatmsg(phone_number, message, send_hour, send_minute, 15, True, 3)
-        kit.sendwhatmsg_instantly(phone_number, message, 15, True, 3)
+    browser = request.GET.get("browser")
+    try:        
+        kit.sendwhatmsg_instantly(phone_number, message, 15, True, 3, browser)
         return JsonResponse({"status": "success", "message": "Message sent successfully"})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})

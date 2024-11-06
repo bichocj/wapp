@@ -3,49 +3,35 @@
 {% block title %}APP | administrador{% endblock %} 
 {% block body %}
 
-<!-- display_data.html -->
+
 <h2>Datos del Archivo XLS</h2>
-<!--
-<table border="1">
-    <tr>
-        {% for key in data.0.keys %}
-            <th>{{ key }}</th>
-        {% endfor %}
-    </tr>
-    {% for row in data %}
-        <tr>
-            {% for value in row.values %}
-                <td>{{ value }}</td>
-            {% endfor %}
-        </tr>
-    {% endfor %}
-</table>
--->
 
 <table class="table">
     <tr>        
+        <th>browser</th>
         <th>Nombre</th>
         <th>Sexo</th>
         <th>Numero</th>
         <th>Banco</th>
         <th>Empresa</th>
-        <th></th>
+        <th>Estado</th>
     </tr>
     {% for row in data %}
         {% if row.nombre == row.nombre %}
         <tr>
+            <td>{{row.browser}}</td>
             <td>{{row.nombre}}</td>
             <td>{{row.sexo}}</td>
-            <td>{{row.numero}}</td>
+            <td>{{row.numero|stringformat:'i'}}</td>
             <td>{{row.banco}}</td>
             <td>{{row.empresa}}</td>
-            <td id="tr{{row.numero}}"></td>
+            <td id="tr{{row.numero|stringformat:'i'}}">en cola</td>
         </tr>
         {% endif %}
     {% endfor %}
 </table>
 <br/>
-<textarea id="message" cols="5" class="form-control">
+<textarea id="message" cols="5" class="form-control" rows="12">
 Estimad(SEX) NAME
 
 Soy Johnny, Analista de Crédito de Scotiabank y me complace informarle sobre una campaña especial que estamos lanzando para COMPANY.
@@ -86,9 +72,11 @@ Convenio - Scotiabank
             const sexs = [];
             const companies = [];
             const banks = [];
+            const browsers = [];
 
             {% for row in data %}
             {% if row.nombre == row.nombre %}
+            browsers.push('{{row.browser}}');
             numbers.push(parseInt('{{row.numero}}'));
             names.push('{{row.nombre}}');
             sexs.push('{{row.sexo}}');
@@ -124,8 +112,7 @@ Convenio - Scotiabank
                 messageTmp = messageTmp.replace("COMPANY", companies[i]);
                 messageTmp = messageTmp.replace("BANK", banks[i]);
 
-                console.log({messageTmp})
-                const params = `phone_number=${number}&message=${encodeURIComponent(messageTmp)}`;
+                const params = `phone_number=${number}&message=${encodeURIComponent(messageTmp)}&browser=${browsers[i]}`;
                 
                 try {
                     const response = await $.get(`/send-whatsapp-message/?${params}`);
