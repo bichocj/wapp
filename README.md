@@ -22,3 +22,5 @@ flyctl postgres connect --app bold-snowflake-842-db
 
 ### Secret Values
 The secret env vars values are in bichocj > google drive > secrets > app
+
+py -m pip install pywin32
